@@ -16,7 +16,13 @@ function L(vars : array of TVar) : TVars; inline;
 
 {-- data constructors -----------------------------------------}
 
-type TKind = ( kRule );
+type TKind = ( kNB, kNL, kRule );
+
+function nb( comment : TStr ) : TVar;
+  begin result := L([kNB, comment])
+  end;
+
+const nl = kNL;
 
 function rule(iden : TStr; alts : array of TVar) : TVar;
   begin result := L([kRule, iden, L(alts)])
@@ -28,14 +34,16 @@ function rule(iden : TStr; alts : array of TVar) : TVar;
 procedure VarShow(v : TVar);
   var item : TVar;
   begin
-    if VarIsStr(v) then cwriteln(v)
+    if VarIsStr(v) then cwrite(v)
     else if VarIsArray(v) then
       if VarIsStr(v[0])
         then for item in TVars(v) do VarShow(item)
         else case TKind(v[0]) of
-          kRule : VarShow(L(['|R@|y ' + v[1], v[2], '|r;']))
+	  kNB : cwrite(['|K', TStr(v[1])]);
+	  kRule : VarShow(L(['|R@|y ' + v[1], nl, v[2], nl, nl ]));
           otherwise
-        end
+	end
+    else if TKind(v) = kNL then newline
   end;
 
 {-- main : shows pretty grammar for PL/0 in color --------------}
@@ -44,41 +52,42 @@ var v : TVar;
 begin
   clrscr;
   VarShow(L([
-    '|wPL/0 syntax',
-    '|Kfrom Algorithms and Data Structures by Niklaus Wirth.',
+    '|wPL/0 syntax', nl,
+    nb('from Algorithms and Data Structures by Niklaus Wirth.'),
+    nl,
 
     rule('program', [
-    '|r:|m block |B.' ]),
+    '|R:|m block |B.' ]),
 
     rule('block', [
-    '|r: (|B const |r( |mident |B= |mnumber |r/ |B, |r)+ |B; |r)?',
-    '|r  (|B var |r( |mident |r/ |B, |r)+ |B; |r)?',
-    '|r  (|B procedure |mident |B; |mblock |B; |r)*',
+    '|R:|r (|B const |r( |mident |B= |mnumber |r/ |B, |r)+ |B; |r)?', nl,
+    '|r  (|B var |r( |mident |r/ |B, |r)+ |B; |r)?',  nl,
+    '|r  (|B procedure |mident |B; |mblock |B; |r)*',  nl,
     '|r  |mstatement' ]),
 
     rule('statement', [
-    '|r:|m ident |B:= |mexpression',
-    '|r|||B call |mident',
-    '|r|||B begin |mstatement |r( |B; |mstatement |r)* |Bend',
-    '|r|||B if |mcondition |Bthen |mstatement',
-    '|r|||B while |mcondition |Bdo |mstatement',
-    '|r|||K (empty statement)' ]),
+    '|R:|m ident |B:= |mexpression', nl,
+    '|r|||B call |mident', nl,
+    '|r|||B begin |mstatement |r( |B; |mstatement |r)* |Bend', nl,
+    '|r|||B if |mcondition |Bthen |mstatement', nl,
+    '|r|||B while |mcondition |Bdo |mstatement', nl,
+    '|r|| ', nb('empty statement') ]),
 
     rule('condition', [
-    '|r|||B odd |mexpression',
+    '|R:|B odd |mexpression', nl,
     '|r|||m expression '
         + '|r( |B= |r|||B < |r|||B ≠ |r|||B > |r|||B ≤ |r|||B ≥ |r)'
         + '|m expression' ]),
 
     rule('expression', [
-    '|r|||r ( |B+ |r|||B - |r) |mterm |r(( |B+ |r|||B - |r) |mterm|r )*' ]),
+    '|R:|r ( |B+ |r|||B - |r) |mterm |r(( |B+ |r|||B - |r) |mterm|r )*' ]),
 
     rule('term', [
-    '|r||| mfactor |r((|B × |r|||B ÷ |r) |mfactor|r )*' ]),
+    '|R:|m factor |r((|B × |r|||B ÷ |r) |mfactor|r )*' ]),
 
     rule('factor', [
-    '|r|||m ident',
-    '|r|||m number',
+    '|R:|m ident', nl,
+    '|r|||m number', nl,
     '|r|||B (|m expression |B)' ]),
 
     '|w'
