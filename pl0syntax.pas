@@ -1,52 +1,62 @@
 { drastic: direct representation of abstract syntax trees }
 {$mode delphiunicode}{$i xpc.inc}
 program drastic;
-uses xpc,kvm,cw;
+uses xpc,kvm,cw,variants;
+
+type TVar = variant; TVars = array of TVar;
+function L(vars : array of TVar) : TVars; inline;
+  begin result := g<TVar>.fromOpenArray(vars);
+  end;
+
+
+
+var v : TVar;
 begin
   clrscr;
-
-  cwriteln('|wPL/0 syntax');
-  cwriteln('|Kfrom Algorithms and Data Structures by Niklaus Wirth.');
+  for v in L([
+    '|wPL/0 syntax',
+    '|Kfrom Algorithms and Data Structures by Niklaus Wirth.',
  
-  cwriteln('|R@|y program');
-  cwriteln('|r:|m block |B.');
-  cwriteln('|r;');
+    '|R@|y program',
+    '|r:|m block |B.',
+    '|r;',
   
-  cwriteln('|R@|y block');
-  cwriteln('|r: (|B const |r( |mident |B= |mnumber |r/ |B, |r)+ |B; |r)?');
-  cwriteln('|r  (|B var |r( |mident |r/ |B, |r)+ |B; |r)?');
-  cwriteln('|r  (|B procedure |mident |B; |mblock |B; |r)*');
-  cwriteln('|r  |mstatement');
-  cwriteln('|r;');
+    '|R@|y block',
+    '|r: (|B const |r( |mident |B= |mnumber |r/ |B, |r)+ |B; |r)?',
+    '|r  (|B var |r( |mident |r/ |B, |r)+ |B; |r)?',
+    '|r  (|B procedure |mident |B; |mblock |B; |r)*',
+    '|r  |mstatement',
+    '|r;',
 
-  cwriteln('|R@|y statement');
-  cwriteln('|r:|m ident |B:= |mexpression');
-  cwriteln('|r|||B call |mident');
-  cwriteln('|r|||B begin |mstatement |r( |B; |mstatement |r)* |Bend');
-  cwriteln('|r|||B if |mcondition |Bthen |mstatement');
-  cwriteln('|r|||B while |mcondition |Bdo |mstatement');
-  cwriteln('|r|||K (empty statement)');
-  cwriteln('|r;');
+    '|R@|y statement',
+    '|r:|m ident |B:= |mexpression',
+    '|r|||B call |mident',
+    '|r|||B begin |mstatement |r( |B; |mstatement |r)* |Bend',
+    '|r|||B if |mcondition |Bthen |mstatement',
+    '|r|||B while |mcondition |Bdo |mstatement',
+    '|r|||K (empty statement)',
+    '|r;',
 
-  cwriteln('|R@|y condition');
-  cwriteln('|r|||B odd |mexpression');
-  cwrite('|r|||m expression ');
-  cwrite('|r( |B= |r|||B < |r|||B ≠ |r|||B > |r|||B ≤ |r|||B ≥ |r)');
-  cwriteln('|m expression');
-  cwriteln('|r;');
+    '|R@|y condition',
+    '|r|||B odd |mexpression',
+    '|r|||m expression '
+        + '|r( |B= |r|||B < |r|||B ≠ |r|||B > |r|||B ≤ |r|||B ≥ |r)',
+    '|m expression',
+    '|r;',
 
-  cwriteln('|R@|y expression');
-  cwriteln('|r|||r ( |B+ |r|||B - |r) |mterm |r(( |B+ |r|||B - |r) |mterm|r )*');
-  cwriteln('|r;');
+    '|R@|y expression',
+    '|r|||r ( |B+ |r|||B - |r) |mterm |r(( |B+ |r|||B - |r) |mterm|r )*',
+    '|r;',
 
-  cwriteln('|R@|y term');
-  cwriteln('|r||| mfactor |r((|B × |r|||B ÷ |r) |mfactor|r )*');
-  cwriteln('|r;');
+    '|R@|y term',
+    '|r||| mfactor |r((|B × |r|||B ÷ |r) |mfactor|r )*',
+    '|r;',
   
-  cwriteln('|R@|y factor');
-  cwriteln('|r|||m ident');
-  cwriteln('|r|||m number');
-  cwriteln('|r|||B (|m expression |B)');
-  cwriteln('|r;');
-  cwriteln('|w');
+    '|R@|y factor',
+    '|r|||m ident',
+    '|r|||m number',
+    '|r|||B (|m expression |B)',
+    '|r;',
+    '|w'
+  ]) do cwriteln(v)
 end.
