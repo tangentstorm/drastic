@@ -3,16 +3,26 @@
 program drastic;
 uses xpc,kvm,cw,variants;
 
-type TVar = variant; TVars = array of TVar;
+{-- constructor for array of variants -------------------------}
+
+type
+  TVar = variant;
+  TVars = array of TVar;
 function L(vars : array of TVar) : TVars; inline;
   begin result := g<TVar>.fromOpenArray(vars);
   end;
+
+
+{-- data constructors -----------------------------------------}
 
 type TKind = ( kRule );
 
 function rule(iden : TStr; alts : array of TVar) : TVar;
   begin result := L([kRule, iden, L(alts)])
   end;
+
+
+{-- show variant strings and arrays ---------------------------}
 
 procedure VarShow(v : TVar);
   var item : TVar;
@@ -27,6 +37,10 @@ procedure VarShow(v : TVar);
 		end
       end;
   end;
+
+
+
+{-- main : shows pretty grammar for PL/0 in color --------------}
 
 var v : TVar;
 begin
