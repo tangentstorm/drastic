@@ -64,7 +64,7 @@ procedure VarShow(v : TVar);
                  for item in drop(1, TVars(v[1])) do varshow(item);
                  cwrite('|<');
                end;
-        kRule : VarShow(L(['|R@|y ' + v[1], nl, v[2], nl, nl ]));
+        kRule : VarShow(L(['|R@|y ' + v[1] + '|_|R:', v[2], nl, nl ]));
         otherwise
       end except on e:EVariantError do for item in tvars(v) do varshow(v) end
     else if TKind(v) = kNL then cwrite('|_') // newline but with indentation
@@ -79,16 +79,16 @@ begin
     nb('from Algorithms and Data Structures by Niklaus Wirth.'), nl,
 
     rule('program', [
-    '|R:|m block |B.' ]),
+    '|m block |B.' ]),
 
     rule('block', [ seq([
-    '|R:|r (|B const |r( |mident |B= |mnumber |r/ |B, |r)+ |B; |r)?', nl,
+    '|r (|B const |r( |mident |B= |mnumber |r/ |B, |r)+ |B; |r)?', nl,
     '|r(|B var |r( |mident |r/ |B, |r)+ |B; |r)?',  nl,
     '|r(|B procedure |mident |B; |mblock |B; |r)*',  nl,
     '|r|mstatement' ]) ]),
 
     rule('statement', [
-    '|R:|m ident |B:= |mexpression', nl,
+    '|m ident |B:= |mexpression', nl,
     '|r|||B call |mident', nl,
     '|r|||B begin |mstatement |r( |B; |mstatement |r)* |Bend', nl,
     '|r|||B if |mcondition |Bthen |mstatement', nl,
@@ -96,19 +96,19 @@ begin
     '|r|| ', nb('empty statement') ]),
 
     rule('condition', [
-    '|R:|B odd |mexpression', nl,
+    '|B odd |mexpression', nl,
     '|r|||m expression '
         + '|r( |B= |r|||B < |r|||B ≠ |r|||B > |r|||B ≤ |r|||B ≥ |r)'
         + '|m expression' ]),
 
     rule('expression', [
-    '|R:|r ( |B+ |r|||B - |r) |mterm |r(( |B+ |r|||B - |r) |mterm|r )*' ]),
+    '|r ( |B+ |r|||B - |r) |mterm |r(( |B+ |r|||B - |r) |mterm|r )*' ]),
 
     rule('term', [
-    '|R:|m factor |r((|B × |r|||B ÷ |r) |mfactor|r )*' ]),
+    '|m factor |r((|B × |r|||B ÷ |r) |mfactor|r )*' ]),
 
     rule('factor', [
-    '|R:|m ident', nl,
+    '|m ident', nl,
     '|r|||m number', nl,
     '|r|||B (|m expression |B)' ]),
 
