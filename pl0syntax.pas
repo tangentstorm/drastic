@@ -51,7 +51,7 @@ procedure VarShow(v : TVar);
         for item in TVars(v) do VarShow(item)
       else try case TKind(v[0]) of
         kNB   : cwrite([ '|K', TStr(v[1])]);
-        kHBox : for item in behead( TVars( v )) do varshow(item);
+        kHBox : varshow(A([ implode(nl, v[1]) ]));
         kLit : cwrite([ '|B', TStr( v[1]) ]);
         kSub : cwrite([ '|m', TStr( v[1]) ]);
         kOpt : varshow(A([ '|r( ', implode(' ', v[1]), ' |r)?' ]));
@@ -60,7 +60,7 @@ procedure VarShow(v : TVar);
         kAlt : varshow(A([ '|r( ', implode(' |r|| ', v[1]), ' |r)' ]));
         kSeq : varshow(A([ '|>', implode(' ', v[1]), '|<' ]));
         kDef : VarShow(A(['|R@|y ', v[1], '|_|R: ',
-                           implode('|_|r|| ' , v[2]), nl, nl ]));
+                           implode('|_|r|| ' , v[2]), nl ]));
         otherwise
           cwrite('|!r|y'); write('<', TKind(v[0]), '>'); cwrite('|w|!k');
       end except on e:EVariantError do for item in tvars(v) do varshow(v) end
@@ -72,24 +72,21 @@ procedure VarShow(v : TVar);
 
 begin
   clrscr;
-  VarShow(A([
-    '|wPL/0 syntax', nl,
-    nb('from Algorithms and Data Structures by Niklaus Wirth.'), nl,
+  VarShow(hbox([
+    '|wPL/0 syntax',
+    nb('from Algorithms and Data Structures by Niklaus Wirth.'),
 
     def('program', [
       seq([ sub('block'), lit('.') ]) ]),
 
     def('block', [ seq([
-
-      opt([ lit('const'),
+      hbox([
+        opt([ lit('const'),
             rep([ sub('ident'), lit('='), sub('number'), '|r/', lit(',') ]),
             lit(';') ]),
-      nl,
-      opt([ lit('var'), rep([ sub('ident'), '|r/', lit(',') ]), lit(';') ]),
-      nl,
-      orp([ lit('procedure'), sub('ident'), lit(';'), sub('block'), lit(';') ]),
-      nl,
-      sub('statement') ]) ]),
+        opt([ lit('var'), rep([ sub('ident'), '|r/', lit(',') ]), lit(';') ]),
+        orp([ lit('procedure'), sub('ident'), lit(';'), sub('block'), lit(';') ]),
+        sub('statement') ]) ]) ]),
 
     def('statement', [
       seq([ sub('ident'), lit(':='), sub('expression') ]),
@@ -101,7 +98,7 @@ begin
       seq([ lit('if'), sub('condition'), lit('then'), sub('statement') ]),
       seq([ lit('while'), sub('condition'), lit('do'), sub('statement') ]),
       nb('empty statement') ]),
-
+
     def( 'condition', [
       seq([ lit('odd'), sub('expression') ]),
       seq([ sub('expression'),
