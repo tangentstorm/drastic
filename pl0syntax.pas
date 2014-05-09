@@ -9,7 +9,7 @@ type
   TVar = variant;
   TVars = array of TVar;
 
-function L(vars : array of TVar) : TVars; inline;
+function A(vars : array of TVar) : TVars; inline;
   begin result := g<TVar>.fromOpenArray(vars);
   end;
 
@@ -44,28 +44,28 @@ function implode(glue : tvar; vars: tvars) : TVars; inline;
 type TKind = ( kNB, kNL, kSeq, kRule, kLit, kSub, kOpt, kRep, kOrp, kHBox );
 
 function nb( comment : TStr ) : TVar;
-  begin result := L([kNB, comment])
+  begin result := A([kNB, comment])
   end;
 
 const nl = kNL;
 
 function seq(parts : array of TVar) : TVar;
-  begin result := L([kSeq, L(parts)])
+  begin result := A([kSeq, A(parts)])
   end;
 
-function lit(s : TStr) : TVar; begin result := L([kLIT, s]) end;
-function sub(s : TStr) : TVar; begin result := L([kSub, s]) end;
+function lit(s : TStr) : TVar; begin result := A([kLIT, s]) end;
+function sub(s : TStr) : TVar; begin result := A([kSub, s]) end;
 
-function opt(vars : array of TVar):TVar; begin result:=L([kOpt, L(vars)]) end;
-function rep(vars : array of TVar):TVar; begin result:=L([kRep, L(vars)]) end;
-function orp(vars : array of TVar):TVar; begin result:=L([kOrp, L(vars)]) end;
+function opt(vars : array of TVar):TVar; begin result:=A([kOpt, A(vars)]) end;
+function rep(vars : array of TVar):TVar; begin result:=A([kRep, A(vars)]) end;
+function orp(vars : array of TVar):TVar; begin result:=A([kOrp, A(vars)]) end;
 
 function rule(iden : TStr; alts : array of TVar) : TVar;
-  begin result := L([kRule, iden, L(alts)])
+  begin result := A([kRule, iden, A(alts)])
   end;
 
 function hbox(vars : array of TVar) : TVar;
-  begin result := L([kHBox, L(vars)])
+  begin result := A([kHBox, A(vars)])
   end;
 
 
@@ -83,16 +83,16 @@ procedure VarShow(v : TVar);
         kHBox : for item in drop(1, TVars(v)) do varshow(item);
         kLit : cwrite([ '|B', TStr(v[1]) ]);
         kSub : cwrite([ '|m', TStr(v[1]) ]);
-        kOpt : varshow(implode(' ', L([ '|r(', drop(1, TVars(v)), '|r)?' ])));
-        kRep : varshow(implode(' ', L([ '|r(', drop(1, TVars(v)), '|r)+' ])));
-        kOrp : varshow(implode(' ', L([ '|r(', drop(1, TVars(v)), '|r)*' ])));
+        kOpt : varshow(implode(' ', A([ '|r(', drop(1, TVars(v)), '|r)?' ])));
+        kRep : varshow(implode(' ', A([ '|r(', drop(1, TVars(v)), '|r)+' ])));
+        kOrp : varshow(implode(' ', A([ '|r(', drop(1, TVars(v)), '|r)*' ])));
         kSeq : if length(TVars(v[1])) > 0 then begin
                  varshow(TVars(v[1])[0]);
                  cwrite('|>');
                  for item in drop(1, TVars(v[1])) do varshow(item);
                  cwrite('|<');
                end;
-        kRule : VarShow(L(['|R@|y ', v[1], '|_|R:',
+        kRule : VarShow(A(['|R@|y ', v[1], '|_|R:',
                            implode('|_|r||', v[2]), nl, nl ]));
         otherwise for item in tvars(v) do varshow(v)
       end except on e:EVariantError do for item in tvars(v) do varshow(v) end
@@ -103,7 +103,7 @@ procedure VarShow(v : TVar);
 
 begin
   clrscr;
-  VarShow(L([
+  VarShow(A([
     '|wPL/0 syntax', nl,
     nb('from Algorithms and Data Structures by Niklaus Wirth.'), nl,
 
