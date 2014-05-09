@@ -3,9 +3,21 @@
 program drastic;
 uses xpc, kvm, cw, variants, uvar, sysutils;
 
+// type uvar.TVar = variant, TVars = array of variant;
+// function uvar.A( {open} array of TVar) : TVars { array constructor }
+
+
 {-- data constructors -----------------------------------------}
 
-type TKind = ( kNB, kNL, kSeq, kAlt, kRule, kLit, kSub, kOpt, kRep, kOrp, kHBox );
+type
+  TKind = (
+    kNB,                  { nota bene (comment) }
+    kNL, kHBox, kVBox,    { newline and horizontal/vertical formatting }
+    kLit, kNul, kSeq,     { empty pattern, literals, and sequences }
+    kAlt, kOpt,           { alternatives and optional }
+    kRep, kOrp,           { repeat and optional repeat }
+    kDef, kSub            { define and use named patterns }
+  );
 
 const nl = kNL;
 
@@ -13,19 +25,18 @@ function nb (s : TStr) : TVar; begin result := A([kNB,  s]) end;
 function lit(s : TStr) : TVar; begin result := A([kLIT, s]) end;
 function sub(s : TStr) : TVar; begin result := A([kSub, s]) end;
 
-function seq(vars : array of TVar):TVar; begin result:=A([kSeq, A(vars)]) end;
-function alt(vars : array of TVar):TVar; begin result:=A([kAlt, A(vars)]) end;
-function opt(vars : array of TVar):TVar; begin result:=A([kOpt, A(vars)]) end;
-function rep(vars : array of TVar):TVar; begin result:=A([kRep, A(vars)]) end;
-function orp(vars : array of TVar):TVar; begin result:=A([kOrp, A(vars)]) end;
+{$define combinator := (vars : array of TVar):TVar; begin result:= }
+function seq combinator A([kSeq, A(vars)]) end;
+function alt combinator A([kAlt, A(vars)]) end;
+function opt combinator A([kOpt, A(vars)]) end;
+function rep combinator A([kRep, A(vars)]) end;
+function orp combinator A([kOrp, A(vars)]) end;
+function hbox combinator A([kHBox, A(vars)]) end;
 
-function rule(iden : TStr; alts : array of TVar) : TVar;
-  begin result := A([kRule, iden, A(alts)])
+function def(iden : TStr; alts : array of TVar) : TVar;
+  begin result := A([kDef, iden, A(alts)])
   end;
 
-function hbox(vars : array of TVar) : TVar;
-  begin result := A([kHBox, A(vars)])
-  end;
 
 
 {-- recursive show for variants -------------------------------}
@@ -54,7 +65,7 @@ procedure VarShow(v : TVar);
                  for item in drop(1, TVars(v[1])) do varshow(item);
                  cwrite('|<');
                end;
-        kRule : VarShow(A(['|R@|y ', v[1], '|_|R:',
+        kDef : VarShow(A(['|R@|y ', v[1], '|_|R:',
                            implode('|_|r||', v[2]), nl, nl ]));
         otherwise
           cwrite('|!r|y'); write('<', TKind(v[0]), '>'); cwrite('|w|!k');
@@ -70,10 +81,10 @@ begin
     '|wPL/0 syntax', nl,
     nb('from Algorithms and Data Structures by Niklaus Wirth.'), nl,
 
-    rule('program', [
+    def('program', [
       seq([ ' ', sub('block'), ' ', lit('.') ]) ]),
 
-    rule('block', [ seq([
+    def('block', [ seq([
       ' ',
       opt([ lit('const'),
             ' ',
@@ -111,7 +122,7 @@ begin
       nl,
       sub('statement') ]) ]),
 
-    rule('statement', [
+    def('statement', [
       seq([ ' ',
             sub('ident'),
             ' ',
@@ -150,7 +161,7 @@ begin
             sub('statement') ]),
       nb(' empty statement') ]),
 
-    rule( 'condition', [
+    def( 'condition', [
       seq([ ' ',
             lit('odd'),
             ' ',
@@ -168,7 +179,7 @@ begin
             ' ',
             sub('expression') ]) ]),
 
-    rule('expression', [
+    def('expression', [
       seq([ '|r (',
                  ' ',
                  lit('+'),
@@ -190,7 +201,7 @@ begin
                  ' ',
                  sub('term') ]) ]) ]),
 
-    rule('term', [
+    def('term', [
       seq([ ' ',
             sub('factor'),
             ' ',
@@ -205,7 +216,7 @@ begin
                  ' ',
                  sub('factor') ]) ]) ]),
 
-    rule('factor', [
+    def('factor', [
       seq([ ' ', sub('ident') ]),
       seq([ ' ', sub('number') ]),
       seq([ ' ', lit('('), ' ', sub('expression'), ' ', lit(')') ]) ]),
