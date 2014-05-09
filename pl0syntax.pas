@@ -56,13 +56,12 @@ procedure VarShow(v : TVar);
         kOpt : varshow(implode(' ', A([ '|r(', behead( TVars(v)), '|r)?' ])));
         kRep : varshow(implode(' ', A([ '|r(', behead( TVars(v)), '|r)+' ])));
         kOrp : varshow(implode(' ', A([ '|r(', behead( TVars(v)), '|r)*' ])));
-        kAlt : varshow(implode(' ', A([ '|r( ',
-				        implode( ' |r|| ', behead( TVars( v ))),
+        kAlt : varshow(implode(' ', A([ '|r(', implode(' |r|| ', v[1]),
 				        ' |r)' ])));
         kSeq : if length(TVars(v[1])) > 0 then begin
                  varshow(TVars(v[1])[0]);
                  cwrite('|>');
-                 for item in drop(1, TVars(v[1])) do varshow(item);
+                 for item in behead(TVars(v[1])) do varshow(item);
                  cwrite('|<');
                end;
         kDef : VarShow(A(['|R@|y ', v[1], '|_|R:',
@@ -72,6 +71,7 @@ procedure VarShow(v : TVar);
       end except on e:EVariantError do for item in tvars(v) do varshow(v) end
     else if TKind(v) = kNL then cwrite('|_') // newline but with indentation
   end;
+
 
 {-- main : shows pretty grammar for PL/0 in color --------------}
 
