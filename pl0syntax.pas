@@ -79,13 +79,13 @@ procedure VarShow(v : TVar);
       if VarIsStr(v[0]) or VarIsArray(v[0]) then
         for item in TVars(v) do VarShow(item)
       else try case TKind(v[0]) of
-        kNB   : cwrite(['|K', TStr(v[1])]);
+        kNB   : cwrite([ '|K', TStr(v[1])]);
         kHBox : for item in drop(1, TVars(v)) do varshow(item);
-        kLit : cwrite(['|M', TStr(v[1])]);
-        kSub : cwrite(['|C', TStr(v[1])]);
-        kOpt : varshow(implode(' ', L(['|r(', drop(1, TVars(v)), '|r)?' ])));
-        kRep : varshow(implode(' ', L(['|r(', drop(1, TVars(v)), '|r)+' ])));
-        kOrp : varshow(implode(' ', L(['|r(', drop(1, TVars(v)), '|r)*' ])));
+        kLit : cwrite([ '|B', TStr(v[1]) ]);
+        kSub : cwrite([ '|m', TStr(v[1]) ]);
+        kOpt : varshow(implode(' ', L([ '|r(', drop(1, TVars(v)), '|r)?' ])));
+        kRep : varshow(implode(' ', L([ '|r(', drop(1, TVars(v)), '|r)+' ])));
+        kOrp : varshow(implode(' ', L([ '|r(', drop(1, TVars(v)), '|r)*' ])));
         kSeq : if length(TVars(v[1])) > 0 then begin
                  varshow(TVars(v[1])[0]);
                  cwrite('|>');
@@ -112,43 +112,158 @@ begin
 
     rule('block', [ seq([
       ' ',
-      opt(['|Bconst |r( |mident |B= |mnumber |r/ |B, |r)+ |B;']), nl,
-      opt(['|Bvar |r( |mident |r/ |B, |r)+ |B;']), nl,
-      orp(['|Bprocedure |mident |B; |mblock |B;']), nl,
+      opt([ lit('const'),
+            ' ',
+            rep([ sub('ident'),
+                  ' ',
+                  lit('='),
+                  ' ',
+                  sub('number'),
+                  ' ',
+                  '|r/',
+                  ' ',
+                  lit(',') ]),
+            ' ',
+            lit(';') ]),
+      nl,
+      opt([ lit('var'),
+            ' ',
+            rep([ sub('ident'),
+                  ' ',
+                  '|r/',
+                  ' ',
+                  lit(',') ]),
+            ' ',
+            lit(';') ]),
+      nl,
+      orp([ lit('procedure'),
+            ' ',
+            sub('ident'),
+            ' ',
+            lit(';'),
+            ' ',
+            sub('block'),
+            ' ',
+            lit(';') ]),
+      nl,
       sub('statement') ]) ]),
 
     rule('statement', [
-      seq(['|m ident |B:= |mexpression']),
-      seq(['|B call', ' ', '|mident' ]),
-      seq(['|B begin |mstatement',
-	   ' ',
-	   orp(['|B; |mstatement']),
-	   ' ',
-	   '|Bend']),
-      seq(['|B if |mcondition |Bthen |mstatement' ]),
-      seq(['|B while |mcondition |Bdo |mstatement' ]),
+      seq([ ' ',
+            sub('ident'),
+            ' ',
+            lit(':='),
+            ' ',
+            sub('expression') ]),
+      seq([ ' ',
+            lit('call'),
+            ' ',
+            sub('ident') ]),
+      seq([ ' ',
+            lit('begin'),
+            ' ',
+            sub('statement'),
+            ' ',
+            orp([ lit(';'),
+                  ' ',
+                  sub('statement')]),
+            ' ',
+            lit('end') ]),
+      seq([ ' ',
+            lit('if'),
+            ' ',
+            sub('condition'),
+            ' ',
+            lit('then'),
+            ' ',
+            sub('statement') ]),
+      seq([ ' ',
+            lit('while'),
+            ' ',
+            sub('condition'),
+            ' ',
+            lit('do'),
+            ' ',
+            sub('statement') ]),
       nb(' empty statement') ]),
 
-    rule('condition', [
-      seq(['|B odd |mexpression']),
-      seq(['|m expression '
-        + '|r( |B= |r|||B < |r|||B ≠ |r|||B > |r|||B ≤ |r|||B ≥ |r)'
-        + '|m expression' ]) ]),
+    rule( 'condition', [
+      seq([ ' ',
+            lit('odd'),
+            ' ',
+            sub('expression') ]),
+      seq([ ' ',
+            sub('expression'),
+            ' ',
+         // grp([        //  TODO
+            '|r(',
+                  ' ',
+                  lit('='),
+                  ' ',
+                  '|r||',
+                  ' ',
+                  lit('<'),
+                  ' ',
+                  '|r||',
+                  ' ',
+                  lit('≠'),
+                  ' ',
+                  '|r||',
+                  ' ',
+                  lit('>'),
+                  ' ',
+                  '|r||',
+                  ' ',
+                  lit('≤'),
+                  ' ',
+                  '|r||',
+                  ' ',
+                  lit('≥'),
+                  ' ', '|r)',
+            ' ',
+            sub('expression') ]) ]),
 
     rule('expression', [
-      seq(['|r ( |B+ |r|||B - |r) |mterm',
-	   ' ',
-	   orp(['( |B+ |r|||B - |r) |mterm']) ]) ]),
+      seq([ '|r (',
+                 ' ',
+                 lit('+'),
+                 ' ',
+                 '|r||',
+                 lit('-'),
+                 ' ', '|r)',
+           ' ',
+           sub('term'),
+           ' ',
+           orp([ '|r(',
+                     ' ',
+                     lit('+'),
+                     ' ',
+                     '|r||',
+                     ' ',
+                     lit('-'),
+                     ' ', '|r)',
+                 ' ',
+                 sub('term') ]) ]) ]),
 
     rule('term', [
-      seq(['|m factor',
-	   ' ',
-	   orp(['(|B × |r|||B ÷ |r) |mfactor' ]) ]) ]),
+      seq([ ' ',
+            sub('factor'),
+            ' ',
+            orp([ '(',
+                      ' ',
+                      lit('×'),
+                      ' ',
+                      '|r||',
+                      ' ',
+                      lit('÷'),
+                      ' ', '|r)',
+                 ' ',
+                 sub('factor') ]) ]) ]),
 
     rule('factor', [
       seq([ ' ', sub('ident') ]),
       seq([ ' ', sub('number') ]),
-      seq([ ' ', lit('('), sub('expression'), lit(')') ]) ]),
+      seq([ ' ', lit('('), ' ', sub('expression'), ' ', lit(')') ]) ]),
 
     '|w'
   ]))
