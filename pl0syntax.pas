@@ -83,7 +83,7 @@ procedure VarShow(v : TVar);
                  cwrite('|<');
                end;
         kRule : VarShow(L(['|R@|y ' + v[1] + '|_|R:',
-			   implode(nl, v[2]), nl, nl ]));
+			   implode('|_|r||', v[2]), nl, nl ]));
         otherwise
       end except on e:EVariantError do for item in tvars(v) do varshow(v) end
     else if TKind(v) = kNL then cwrite('|_') // newline but with indentation
@@ -108,15 +108,15 @@ begin
 
     rule('statement', [
     '|m ident |B:= |mexpression',
-    '|r|||B call |mident',
-    '|r|||B begin |mstatement |r( |B; |mstatement |r)* |Bend',
-    '|r|||B if |mcondition |Bthen |mstatement',
-    '|r|||B while |mcondition |Bdo |mstatement',
-    hbox([ '|r|| ', nb('empty statement') ]) ]),
+    '|B call |mident',
+    '|B begin |mstatement |r( |B; |mstatement |r)* |Bend',
+    '|B if |mcondition |Bthen |mstatement',
+    '|B while |mcondition |Bdo |mstatement',
+    nb(' empty statement') ]),
 
     rule('condition', [
     '|B odd |mexpression',
-    '|r|||m expression '
+    '|m expression '
         + '|r( |B= |r|||B < |r|||B ≠ |r|||B > |r|||B ≤ |r|||B ≥ |r)'
         + '|m expression' ]),
 
@@ -128,8 +128,8 @@ begin
 
     rule('factor', [
     '|m ident',
-    '|r|||m number',
-    '|r|||B (|m expression |B)' ]),
+    '|m number',
+    '|B (|m expression |B)' ]),
 
     '|w'
   ]))
