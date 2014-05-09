@@ -8,6 +8,7 @@ uses xpc,kvm,cw,variants;
 type
   TVar = variant;
   TVars = array of TVar;
+
 function L(vars : array of TVar) : TVars; inline;
   begin result := g<TVar>.fromOpenArray(vars);
   end;
@@ -22,30 +23,27 @@ function rule(iden : TStr; alts : array of TVar) : TVar;
   end;
 
 
-{-- show variant strings and arrays ---------------------------}
+{-- recursive show for variants -------------------------------}
 
 procedure VarShow(v : TVar);
   var item : TVar;
   begin
     if VarIsStr(v) then cwriteln(v)
     else if VarIsArray(v) then
-      case TKind(v[0]) of
-	kRule : begin
-		  cwriteln('|R@|y ' + v[1]);
-		  for item in TVars(v[2]) do cwriteln(item);
-		  cwriteln('|r;');
-		end
-      end;
+      if VarIsStr(v[0])
+        then for item in TVars(v) do VarShow(item)
+        else case TKind(v[0]) of
+          kRule : VarShow(L(['|R@|y ' + v[1], v[2], '|r;']))
+          otherwise
+        end
   end;
-
-
 
 {-- main : shows pretty grammar for PL/0 in color --------------}
 
 var v : TVar;
 begin
   clrscr;
-  for v in L([
+  VarShow(L([
     '|wPL/0 syntax',
     '|Kfrom Algorithms and Data Structures by Niklaus Wirth.',
 
@@ -84,5 +82,5 @@ begin
     '|r|||B (|m expression |B)' ]),
 
     '|w'
-  ]) do VarShow(v)
+  ]))
 end.
