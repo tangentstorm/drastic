@@ -34,24 +34,24 @@ assert (,.  11)    is 2 r2 ar 0 1
 assert (,: 11 111) is 2 r3 ar 0 1
 assert (,. 111)    is 3 r3 ar 0 1 11
 
-NB. converse of a binary relation (reverses the direction)
-cv =: ( |."_1 ) : ( -@[ |."1 ] )
+NB. inverse of a binary relation (reverses the direction)
+iv =: ( |."_1 ) : ( -@[ |."1 ] )
 assert (     r1) is (> 0 1 ; 0 2 ; 1 3 ; 2 4)
-assert (  cv r1) is (> 1 0 ; 2 0 ; 3 1 ; 4 2 )
-assert (1 cv r1) is (> 1 0 ; 2 0 ; 3 1 ; 4 2 )
+assert (  iv r1) is (> 1 0 ; 2 0 ; 3 1 ; 4 2 )
+assert (1 iv r1) is (> 1 0 ; 2 0 ; 3 1 ; 4 2 )
 
 r2 =: > 0 1 11 ; 0 2 22 ; 1 3 33 ; 2 4 44
 assert (     r2) is (> 0 1 11; 0 2 22; 1 3 33; 2 4 44)
-assert (2 cv r2) is (> 1 11 0; 2 22 0; 3 33 1; 4 44 2)
+assert (2 iv r2) is (> 1 11 0; 2 22 0; 3 33 1; 4 44 2)
 
 NB. ------------------------------------------------------------
-NB.   R ac y : apply converse of binary relation R to y
-NB. x R ac y : same, but treat n-ary R as binary with split at x
+NB.   R ai y : apply inverse of binary relation R to y
+NB. x R ai y : same, but treat n-ary R as binary with split at x
 NB. ------------------------------------------------------------
-ac =: adverb : 0
-  ((cv m) ar)  :. (m ar) y
+ai =: adverb : 0
+  ((iv m) ar)  :. (m ar) y
 :
-  x (((x cv m) ar) :. (m ar)) y
+  x (((x iv m) ar) :. (m ar)) y
 )
 
 
@@ -59,12 +59,12 @@ r4 =: > 0 1 11 ; 0 2 22 ; 1 2 22
 assert (,. 1 11 ,: 2 22) is r4 ar 0    NB. nothing new here.
 assert (        ,: 2 22) is r4 ar 1
 NB. monadic case: ( a | b c )
-assert (,.   0)  is 2 r4 ac 1 11       NB. but ac maps value to key
+assert (,.   0)  is 2 r4 ai 1 11       NB. but ac maps value to key
 
 
 NB. dyadic case: ( a b | c ) (when x = 2)
-assert (,.   0)  is 2 r4 ac 1 11       NB. but ac maps value to key
-assert (,. 0 1)  is 2 r4 ac 2 22       NB. (or to multiple keys)
+assert (,.   0)  is 2 r4 ai 1 11       NB. but ac maps value to key
+assert (,. 0 1)  is 2 r4 ai 2 22       NB. (or to multiple keys)
 
 
 NB. ============================================================
@@ -149,8 +149,8 @@ process =: lang_ind , lang_dep
 
 N =: 0 NB. current node
 move   =: verb : 'N =: u y'
-parent =: verb : '{. cv ap__tree y'
-rtsib  =: verb : '(0 1 + ])&.ac__tree y'
+parent =: verb : '{. iv ap__tree y'
+rtsib  =: verb : '(0 1 + ])&.ai__tree y'
 
 NB. positioning commands
 cmd_out =: verb : 'move (parent tl) N'
