@@ -11,28 +11,32 @@ is =: dyad : 0
   if. -. x -: y do. echo (5!:5<'x'),' ~: ',(5!:5<'y') end. x -: y
 )
 
+NB. tl makes a function total (defined for all domains)
+tl =: :: ]
+
 NB. some test relations (rows separated by ';')
 r1 =: > 0 1 ; 0 2 ; 1 3 ; 2 4
 r2 =: > 0 1 11 ; 0 2 22 ; 1 3 33 ; 2 4 44
 r3 =: > 0 1 11 111; 0 2 22 222; 1 3 33 333; 2 4 44 444
 
+
 NB. ------------------------------------------------------------
-NB.   R ar y : apply binary relation R to y
-NB. x R ar y : same, but treat n-ary R as binary with split at x
+NB.   R ap y : apply dyadic relation R to y
+NB. x R ap y : same, but treat n-ary R as dyadic with split at x
 NB. ------------------------------------------------------------
-ar =: adverb : 0
-    }."1 m #~ y ="1   {."1 m
+ap =: adverb : 0
+    }."1 m #~ y  ="1   {."1 m
 :
   x }."1 m #~ y -:"1 x {."1 m
 )
-assert (,. 1 2 ) is r1 ar 0     NB. two-row result for key=0
-assert (,. 3   ) is r1 ar 1     NB. one-row result for key=1
-assert (0 1 $ _) is r1 ar 9     NB. no results for key=9
+assert (,. 1 2 ) is r1 ap 0     NB. two-row result for key=0
+assert (,. 3   ) is r1 ap 1     NB. one-row result for key=1
+assert (0 1 $ _) is r1 ap 9     NB. no results for key=9
 
 NB. dyadic case should let us specify the size of the key
-assert (,.  11)    is 2 r2 ar 0 1
-assert (,: 11 111) is 2 r3 ar 0 1
-assert (,. 111)    is 3 r3 ar 0 1 11
+assert (,.  11)    is 2 r2 ap 0 1
+assert (,: 11 111) is 2 r3 ap 0 1
+assert (,. 111)    is 3 r3 ap 0 1 11
 
 NB. inverse of a binary relation (reverses the direction)
 iv =: ( |."_1 ) : ( -@[ |."1 ] )
@@ -44,20 +48,21 @@ r2 =: > 0 1 11 ; 0 2 22 ; 1 3 33 ; 2 4 44
 assert (     r2) is (> 0 1 11; 0 2 22; 1 3 33; 2 4 44)
 assert (2 iv r2) is (> 1 11 0; 2 22 0; 3 33 1; 4 44 2)
 
+
 NB. ------------------------------------------------------------
 NB.   R ai y : apply inverse of binary relation R to y
 NB. x R ai y : same, but treat n-ary R as binary with split at x
 NB. ------------------------------------------------------------
 ai =: adverb : 0
-  ((iv m) ar)  :. (m ar) y
+  ((iv m) ap)  :. (m ap) y
 :
-  x (((x iv m) ar) :. (m ar)) y
+  x (((x iv m) ap) :. (m ap)) y
 )
 
 
 r4 =: > 0 1 11 ; 0 2 22 ; 1 2 22
-assert (,. 1 11 ,: 2 22) is r4 ar 0    NB. nothing new here.
-assert (        ,: 2 22) is r4 ar 1
+assert (,. 1 11 ,: 2 22) is r4 ap 0    NB. nothing new here.
+assert (        ,: 2 22) is r4 ap 1
 NB. monadic case: ( a | b c )
 assert (,.   0)  is 2 r4 ai 1 11       NB. but ac maps value to key
 
@@ -66,7 +71,7 @@ NB. dyadic case: ( a b | c ) (when x = 2)
 assert (,.   0)  is 2 r4 ai 1 11       NB. but ac maps value to key
 assert (,. 0 1)  is 2 r4 ai 2 22       NB. (or to multiple keys)
 
-
+
 NB. ============================================================
 NB. relation class
 NB. ============================================================
@@ -100,16 +105,12 @@ create =: monad : 0
   end.
 )
 
-NB. (ap__R K) : apply relation R to key k
-ap =: verb : 'split }."1 r #~ y = split {."1 m'
-
-
-NB. makes a function total (defined for all domains)
-tl =: :: ]
-
+
 NB. ============================================================
-NB. -- application ---------------------------------------------
+NB. -- syntax directed editor --------------------------------
 NB. ============================================================
+NB. based on "a relational program for a syntax directed editor"
+NB. by B.J. MacLennan|https://github.com/tangentstorm/maclennan/
 cocurrent 'base'
 Rel =: conew & 'Rel'
 
