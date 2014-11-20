@@ -88,11 +88,11 @@ assert 2 = findsplit s: ;: 'a:int b:int | c:int'
 create =: monad : 0
   NB. example:  'sub:int rel:int obj:int' conew 'Rel'
   y =. (' '"_)^:(':'=])"0 y  NB. discard ':' chars
-  split =: findsplit toks =. s: ;: y
-  'keyNames keyTypes' =. |: _2 ]\ toks -. s:<'|'
-  for_i. i. # keyNames do.
-    n =. i { keyNames
-    k =. i { keyTypes
+  sp =: findsplit toks =. s: ;: y
+  'keys doms' =: |: _2 ]\ toks -. s:<'|'
+  for_i. i. # keys do.
+    n =. i { keys
+    k =. i { doms
     if. -. k e. typeSyms do.
       echo 'unknown type:', sym2lit k
       throw.
@@ -103,7 +103,28 @@ create =: monad : 0
       NB. TODO...
     end.
   end.
+  nk =: #keys
+  ek =: sp & {."1      NB. extract key columns (from arg or data))
+  ev =: sp & }."1      NB. extract val columns (from data)
+  ke =: (nk-sp) & {."1 NB. extract inverted key (from arg)
+  data =: }: ,: i. nk  NB. init empty relation as 0*nkeys array
 )
+
+
+NB. relation verbs
+
+NB. apply relation to arguments to fetch data by key:
+rel=: (verb : 'data')
+get=: ev@rel #~ (ek@rel) -:"1 ek
+ap =: get`rel@.(''-:])
+
+NB. inverse relation (fetch key by val)
+ler=: (verb : '(ev,.ek) data')
+teg=: ek@rel #~ (ev@rel) -:"1 ke  NB. 
+iv =: teg`ler@.(''-:])
+
+NB. insert data into the table
+ins=: (verb : 'data =: ~. data, y') L:0 $~0:
 
 
 NB. ============================================================
@@ -119,6 +140,7 @@ tree =: Rel 'node:nid | ord:int child:nid'  NB. connections
 udfn =: Rel 'node:nid | nont:int'           NB. undefined nodes
 defn =: Rel 'node:nid | altk:int rule:int'  NB. defined nodes
 
+alts =: Rel 'nont:int key:int | rule:int'
 forw =: Rel 'from:int | to:int'
 rule =: Rel 'asys:int ssys:int dict:int'
 NB. asys =. Rel '' (term | nont)^2 // sequences of non-terminals
@@ -147,12 +169,30 @@ lang_dep =: 0 : 0
 )
 
 process =: lang_ind , lang_dep
+
+
 
 N =: 0 NB. current node
-move   =: verb : 'N =: u y'
-parent =: verb : '{. iv ap__tree y'
+move   =: adverb : 'N =: u y'
+parent =: fst @ Ti
 rtsib  =: verb : '(0 1 + ])&.ai__tree y'
 
 NB. positioning commands
-cmd_out =: verb : 'move (parent tl) N'
-cmd_in  =: verb : 'move ((T ap) tl) (,1:) N'
+cmd_out =: parent tl  move
+cmd_in  =: T tl@(,1:) move
+
+T =: ap__tree :. iv__tree
+Alts =: ap__alts
+Forw =: ap__forw
+
+
+NB. unparsing
+id  =: ]
+fst =: {."1
+cat =: ,/
+rdc =: 2 : 'u/n,y'
+
+unparse =: T ap :: dispnode
+dispnode =: disprule @: (id ,. (Alts :: Forw)@: fst @: T)
+disprule =: cat rdc '' @: danal
+
