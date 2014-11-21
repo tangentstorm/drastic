@@ -124,7 +124,7 @@ teg=: ek@rel #~ (ev@rel) -:"1 ke  NB.
 iv =: teg`ler@.(''-:])
 
 NB. insert data into the table
-ins=: (verb : 'data =: ~. data, y') L:0 $~0:
+ins=: (verb : 'data =: ~. data, y') $~0:
 
 
 NB. ============================================================
@@ -137,15 +137,17 @@ Rel =: conew & 'Rel'
 
 NB. -- the syntax tree -----------------------------------------
 tree =: Rel 'node:nid | ord:int child:nid'  NB. connections
-udfn =: Rel 'node:nid | nont:int'           NB. undefined nodes
-defn =: Rel 'node:nid | altk:int rule:int'  NB. defined nodes
+udfn =: Rel 'node:nid | nont:sym'           NB. undefined nodes
+defn =: Rel 'node:nid | nont:sym altk:chr'  NB. defined nodes
 
-alts =: Rel 'nont:int key:int | rule:int'
-forw =: Rel 'from:int | to:int'
+alts =: Rel 'nont:sym  altk:chr | rule:int'
+forw =: Rel 'src:sym | dst:sym'             NB. chain alt rules
+
+
+dict =: Rel 'nont:sym | path:box'
 rule =: Rel 'asys:int ssys:int dict:int'
 NB. asys =. Rel '' (term | nont)^2 // sequences of non-terminals
 NB. ssys =. Rel '' (node | node*int) -> (node|nont|nont*altk)
-dict =: Rel 'nont:int | i:int'
 
 
 NB. --- editor functions ---------------------------------------
@@ -175,7 +177,7 @@ process =: lang_ind , lang_dep
 N =: 0 NB. current node
 move   =: adverb : 'N =: u y'
 parent =: fst @ Ti
-rtsib  =: verb : '(0 1 + ])&.ai__tree y'
+rsib   =: verb : '(0 1 + ])&.ai__tree y'
 
 NB. positioning commands
 cmd_out =: parent tl  move
@@ -192,7 +194,59 @@ fst =: {."1
 cat =: ,/
 rdc =: 2 : 'u/n,y'
 
-unparse =: T ap :: dispnode
-dispnode =: disprule @: (id ,. (Alts :: Forw)@: fst @: T)
-disprule =: cat rdc '' @: danal
+NB. rules are templates
 
+NB. dispnt: recursive procedure to display non-terminals
+dispnt =: dyad : 0
+  'nid rule' =: x
+  x unparse (2{rule) ap y
+)
+danal =: dyad : 0
+  'n r' =: x
+  try. x dispnt L: _ 0 (0{r) catch. end.
+)
+disprule =: cat rdc '' @: danal
+dispnode =: disprule @: (id ,. (Alts :: Forw)@: fst @: T)
+unparse =: T ap :: dispnode
+
+
+NB. terminals
+'ALPHA DIGIT PLUS MINUS STAR SLASH'=:s:'`ALPHA`DIGIT`+`-`*`/'
+
+NB. nonterminals
+'NUMBER GROUP'=:s:'`NUMBER`GROUP'
+
+ia=:ins__alts@<
+ia 0; ALPHA
+
+lang =: 0 : 0
+  digit:'0'..'9'.
+)
+
+NB. example language
+ins__forw
+
+ins=.ins__tree
+
+
+
+NB. tree table
+NB. ------------------
+NB. 13  (2 ({.;}.)"1 [,.i.@#@],.]) 1 3 4 8
+NB. subs =: [: :([: < [) ,. [: (i.@# ;"0 ]) [: s: ' ',]
+
+NB. for (node → non-term) and (node → (non-term × key)) combinations:
+
+
+as =: 4 :'x;<y'
+sym=: 3 :'s:<y'
+
+is =: 4 : 0
+  ins__alts(<sym x),y
+)
+end=: 1 :'<m'
+rep=: 1 :'(sym''*'');m'
+ref=: sym
+
+
+'<number>' is (ref'digit')rep end
